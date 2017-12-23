@@ -40,7 +40,7 @@ AboutBox::AboutBox(QWidget *parent)
 }
 
 void AboutBox::prepare() {
-	setTitle([] { return qsl("Telegram Desktop"); });
+	setTitle([] { return qsl("TSupport Desktop"); });
 
 	addButton(langFactory(lng_close), [this] { closeBox(); });
 
@@ -100,13 +100,15 @@ void AboutBox::keyPressEvent(QKeyEvent *e) {
 }
 
 QString telegramFaqLink() {
-	auto result = qsl("https://telegram.org/faq");
+	auto result = qsl("https://core.telegram.org/tsi#manifesto-faq");
+#if 0
 	auto language = Lang::Current().id();
 	for (auto faqLanguage : { "de", "es", "it", "ko", "br" }) {
 		if (language.startsWith(QLatin1String(faqLanguage))) {
 			result.append('/').append(faqLanguage);
 		}
 	}
+#endif
 	return result;
 }
 

@@ -1566,6 +1566,8 @@ void MainWidget::sendMessage(const MessageToSend &message) {
 	history->lastSentMsg = lastMessage;
 
 	finishForwarding(history);
+	markActiveHistoryAsReadNew();
+	//Auth().api().readServerHistoryNew(history);
 }
 
 void MainWidget::saveRecentHashtags(const QString &text) {
@@ -2990,6 +2992,12 @@ void MainWidget::newUnreadMsg(History *history, HistoryItem *item) {
 void MainWidget::markActiveHistoryAsRead() {
 	if (const auto activeHistory = _history->history()) {
 		Auth().api().readServerHistory(activeHistory);
+	}
+}
+
+void MainWidget::markActiveHistoryAsReadNew() {
+	if (const auto activeHistory = _history->history()) {
+		Auth().api().readServerHistoryNew(activeHistory);
 	}
 }
 

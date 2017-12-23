@@ -42,7 +42,7 @@ void Launcher::init() {
 
 	prepareSettings();
 
-	QCoreApplication::setApplicationName(qsl("TelegramDesktop"));
+	QCoreApplication::setApplicationName(qsl("TSupportDesktop"));
 
 #ifndef OS_MAC_OLD
 	QCoreApplication::setAttribute(Qt::AA_DisableHighDpiScaling, true);

@@ -124,7 +124,7 @@ void ApiWrap::addLocalChangelogs(int oldAppVersion) {
 		addLocalAlphaChangelog(1002002, "\xE2\x80\x94 Grouped photos and videos are displayed as albums.");
 	}
 	if (!addedSome) {
-		auto text = lng_new_version_wrap(lt_version, str_const_toString(AppVersionStr), lt_changes, lang(lng_new_version_minor), lt_link, qsl("https://desktop.telegram.org/changelog")).trimmed();
+		auto text = lng_new_version_wrap(lt_version, str_const_toString(AppVersionStr), lt_changes, lang(lng_new_version_minor)).trimmed();
 		addLocalChangelog(text);
 	}
 }
@@ -2656,7 +2656,13 @@ void ApiWrap::readServerHistory(not_null<History*> history) {
 	}
 }
 
-void ApiWrap::readServerHistoryForce(not_null<History*> history) {
+void ApiWrap::readServerHistoryNew(not_null<History*> history) {
+	if (history->unreadCount()) {
+		readServerHistoryForceNew(history);
+	}
+}
+
+void ApiWrap::readServerHistoryForceNew(not_null<History*> history) {
 	const auto peer = history->peer;
 	const auto upTo = history->inboxRead(0);
 	if (const auto channel = peer->asChannel()) {
@@ -2679,6 +2685,32 @@ void ApiWrap::readServerHistoryForce(not_null<History*> history) {
 	} else {
 		sendReadRequest(peer, upTo);
 	}
+}
+
+void ApiWrap::readServerHistoryForce(not_null<History*> history) {
+	const auto peer = history->peer;
+//	const auto upTo = history->inboxRead(0);
+	if (const auto channel = peer->asChannel()) {
+		if (!channel->amIn()) {
+			return; // no read request for channels that I didn't join
+		} else if (const auto migrateFrom = channel->migrateFrom()) {
+			if (const auto migrated = App::historyLoaded(migrateFrom)) {
+				readServerHistory(migrated);
+			}
+		}
+	}
+/*
+	if (_readRequests.contains(peer)) {
+		const auto i = _readRequestsPending.find(peer);
+		if (i == _readRequestsPending.cend()) {
+			_readRequestsPending.emplace(peer, upTo);
+		} else if (i->second < upTo) {
+			i->second = upTo;
+		}
+	} else {
+		//sendReadRequest(peer, upTo);
+	}
+	*/
 }
 
 void ApiWrap::sendReadRequest(not_null<PeerData*> peer, MsgId upTo) {

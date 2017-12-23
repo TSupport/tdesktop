@@ -287,7 +287,7 @@ void MainWindow::updateUnreadCounter() {
 	if (!Global::started() || App::quitting()) return;
 
 	auto counter = App::histories().unreadBadge();
-	_titleText = (counter > 0) ? qsl("Telegram (%1)").arg(counter) : qsl("Telegram");
+	_titleText = (counter > 0) ? qsl("TSupport (%1)").arg(counter) : qsl("TSupport");
 
 	unreadCounterChangedHook();
 }

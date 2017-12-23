@@ -310,11 +310,11 @@ QString getHomeDir() {
 } // namespace
 
 QString psAppDataPath() {
-	// Previously we used ~/.TelegramDesktop, so look there first.
+	// Previously we used ~/.TSupportDesktop, so look there first.
 	// If we find data there, we should still use it.
 	auto home = getHomeDir();
 	if (!home.isEmpty()) {
-		auto oldPath = home + qsl(".TelegramDesktop/");
+		auto oldPath = home + qsl(".TSupportDesktop/");
 		auto oldSettingsBase = oldPath + qsl("tdata/settings");
 		if (QFile(oldSettingsBase + '0').exists() || QFile(oldSettingsBase + '1').exists()) {
 			return oldPath;
@@ -435,7 +435,7 @@ void psRegisterCustomScheme() {
 		if (!QDir(apps).exists()) QDir().mkpath(apps);
 		if (!QDir(icons).exists()) QDir().mkpath(icons);
 
-		QString path = cWorkingDir() + qsl("tdata/"), file = path + qsl("telegramdesktop.desktop");
+		QString path = cWorkingDir() + qsl("tdata/"), file = path + qsl("tsupportdesktop.desktop");
 		QDir().mkpath(path);
 		QFile f(file);
 		if (f.open(QIODevice::WriteOnly)) {
@@ -457,13 +457,13 @@ void psRegisterCustomScheme() {
 			s.setCodec("UTF-8");
 			s << "[Desktop Entry]\n";
 			s << "Version=1.0\n";
-			s << "Name=Telegram Desktop\n";
-			s << "Comment=Official desktop version of Telegram messaging app\n";
+			s << "Name=TSupport Desktop\n";
+//			s << "Comment=Official desktop version of Telegram messaging app\n";
 			s << "TryExec=" << EscapeShell(QFile::encodeName(cExeDir() + cExeName())) << "\n";
 			s << "Exec=" << EscapeShell(QFile::encodeName(cExeDir() + cExeName())) << " -- %u\n";
 			s << "Icon=telegram\n";
 			s << "Terminal=false\n";
-			s << "StartupWMClass=TelegramDesktop\n";
+			s << "StartupWMClass=TSupportDesktop\n";
 			s << "Type=Application\n";
 			s << "Categories=Network;InstantMessaging;Qt;\n";
 			s << "MimeType=x-scheme-handler/tg;\n";
@@ -471,10 +471,10 @@ void psRegisterCustomScheme() {
 
 			if (_psRunCommand("desktop-file-install --dir=" + EscapeShell(QFile::encodeName(home + qsl(".local/share/applications"))) + " --delete-original " + EscapeShell(QFile::encodeName(file)))) {
 				DEBUG_LOG(("App Info: removing old .desktop file"));
-				QFile(qsl("%1.local/share/applications/telegram.desktop").arg(home)).remove();
+				QFile(qsl("%1.local/share/applications/tsupport.desktop").arg(home)).remove();
 
 				_psRunCommand("update-desktop-database " + EscapeShell(QFile::encodeName(home + qsl(".local/share/applications"))));
-				_psRunCommand("xdg-mime default telegramdesktop.desktop x-scheme-handler/tg");
+				_psRunCommand("xdg-mime default tsupportdesktop.desktop x-scheme-handler/tg");
 			}
 		} else {
 			LOG(("App Error: Could not open '%1' for write").arg(file));

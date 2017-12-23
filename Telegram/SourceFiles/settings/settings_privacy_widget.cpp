@@ -183,9 +183,19 @@ void PrivacyWidget::createControls() {
 	style::margins slidedPadding(0, marginSmall.bottom() / 2, 0, marginSmall.bottom() - (marginSmall.bottom() / 2));
 
 	createChildRow(_blockedUsers, marginSmall, lang(lng_settings_blocked_users), SLOT(onBlockedUsers()));
+	/** TSupport: Disabling following setting items
+	 * 		Last seen privacy
+	 * 		Phone calls privacy
+	 * 		Group invite settings
+	 * 		Enable two-step verification
+	 * 		Show all sessions
+	 * 		Account self-destruct settings
+	 **/
+#if 0
 	createChildRow(_lastSeenPrivacy, marginSmall, lang(lng_settings_last_seen_privacy), SLOT(onLastSeenPrivacy()));
 	createChildRow(_callsPrivacy, marginSmall, lang(lng_settings_calls_privacy), SLOT(onCallsPrivacy()));
 	createChildRow(_groupsInvitePrivacy, marginSmall, lang(lng_settings_groups_invite_privacy), SLOT(onGroupsInvitePrivacy()));
+#endif
 	createChildRow(_localPasscodeState, marginSmall);
 	auto label = lang(psIdleSupported() ? lng_passcode_autolock_away : lng_passcode_autolock_inactive);
 	auto value = GetAutoLockText();
@@ -193,9 +203,11 @@ void PrivacyWidget::createControls() {
 	if (!Global::LocalPasscode()) {
 		_autoLock->hide(anim::type::instant);
 	}
+#if 0
 	createChildRow(_cloudPasswordState, marginSmall);
 	createChildRow(_showAllSessions, marginSmall, lang(lng_settings_show_sessions), SLOT(onShowSessions()));
 	createChildRow(_selfDestruction, marginSmall, lang(lng_settings_self_destruct), SLOT(onSelfDestruction()));
+#endif
 }
 
 void PrivacyWidget::autoLockUpdated() {

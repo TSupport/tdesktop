@@ -71,7 +71,10 @@ void AdvancedWidget::createControls() {
 #endif // !TDESKTOP_DISABLE_NETWORK_PROXY
 
 	if (self()) {
+		/** TSupport: Disabling "Ask a Question" settings item **/
+#if 0
 		createChildRow(_askQuestion, marginSmall, lang(lng_settings_ask_question), SLOT(onAskQuestion()));
+#endif
 	} else {
 		style::margins slidedPadding(0, marginLarge.bottom() / 2, 0, marginLarge.bottom() - (marginLarge.bottom() / 2));
 		createChildRow(_useDefaultTheme, marginLarge, slidedPadding, lang(lng_settings_bg_use_default), SLOT(onUseDefaultTheme()));

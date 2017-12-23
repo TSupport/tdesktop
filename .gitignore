@@ -55,3 +55,8 @@ xcuserdata
 /Linux/
 /Telegram/Makefile
 *.*~
+
+
+/Telegram/Resources/art/favicon.ico.old
+cscope.out
+/TelegramPrivate/

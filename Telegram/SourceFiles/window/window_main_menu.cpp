@@ -70,7 +70,7 @@ MainMenu::MainMenu(
 	});
 	refreshMenu();
 
-	_telegram->setRichText(textcmdLink(1, qsl("Telegram Desktop")));
+	_telegram->setRichText(textcmdLink(1, qsl("TSupport Desktop")));
 	_telegram->setLink(1, std::make_shared<UrlClickHandler>(qsl("https://desktop.telegram.org")));
 	_version->setRichText(textcmdLink(1, lng_settings_current_version(lt_version, currentVersionText())) + QChar(' ') + QChar(8211) + QChar(' ') + textcmdLink(2, lang(lng_menu_about)));
 	_version->setLink(1, std::make_shared<UrlClickHandler>(qsl("https://desktop.telegram.org/changelog")));
@@ -94,6 +94,13 @@ MainMenu::MainMenu(
 
 void MainMenu::refreshMenu() {
 	_menu->clearActions();
+	/** TSupport: Disabling following options
+	 * 	New Group
+	 * 	New Channel
+	 * 	Contacts
+	 * 	Calls
+	 **/
+#if 0
 	_menu->addAction(lang(lng_create_group_title), [] {
 		App::wnd()->onShowNewGroup();
 	}, &st::mainMenuNewGroup, &st::mainMenuNewGroupOver);
@@ -113,6 +120,7 @@ void MainMenu::refreshMenu() {
 			}));
 		}, &st::mainMenuCalls, &st::mainMenuCallsOver);
 	}
+#endif
 	_menu->addAction(lang(lng_menu_settings), [] {
 		App::wnd()->showSettings();
 	}, &st::mainMenuSettings, &st::mainMenuSettingsOver);

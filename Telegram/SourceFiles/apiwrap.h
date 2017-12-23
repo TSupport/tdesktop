@@ -184,7 +184,9 @@ public:
 		const SendOptions &options);
 	void shareContact(not_null<UserData*> user, const SendOptions &options);
 	void readServerHistory(not_null<History*> history);
+	void readServerHistoryNew(not_null<History*> history);
 	void readServerHistoryForce(not_null<History*> history);
+	void readServerHistoryForceNew(not_null<History*> history);
 
 	~ApiWrap();
 

@@ -145,6 +145,7 @@ public:
 	void dialogsToUp();
 	void newUnreadMsg(History *history, HistoryItem *item);
 	void markActiveHistoryAsRead();
+	void markActiveHistoryAsReadNew();
 
 	void peerBefore(const PeerData *inPeer, MsgId inMsg, PeerData *&outPeer, MsgId &outMsg);
 	void peerAfter(const PeerData *inPeer, MsgId inMsg, PeerData *&outPeer, MsgId &outMsg);

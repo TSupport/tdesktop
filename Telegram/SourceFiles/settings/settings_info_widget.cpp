@@ -47,15 +47,21 @@ void InfoWidget::createControls() {
 	style::margins margin(0, 0, 0, 0);
 	style::margins slidedPadding(0, 0, 0, 0);
 	createChildRow(_mobileNumber, margin, slidedPadding, st::settingsBlockOneLineTextPart);
+	/** TSupport: Disabling username and bio option **/
+#if 0
 	createChildRow(_username, margin, slidedPadding, st::settingsBlockOneLineTextPart);
 	createChildRow(_bio, margin, slidedPadding, st::settingsBioValue);
+#endif
 	refreshControls();
 }
 
 void InfoWidget::refreshControls() {
 	refreshMobileNumber();
+	/** TSupport: Disabling username and bio option **/
+#if 0
 	refreshUsername();
 	refreshBio();
+#endif
 }
 
 void InfoWidget::refreshMobileNumber() {
@@ -82,6 +88,9 @@ void InfoWidget::refreshMobileNumber() {
 }
 
 void InfoWidget::refreshUsername() {
+
+	/** TSupport: Disabling username option **/
+#if 0
 	TextWithEntities usernameText;
 	QString copyText;
 	if (self()->username.isEmpty()) {
@@ -108,9 +117,12 @@ void InfoWidget::refreshUsername() {
 			return false;
 		});
 	}
+#endif
 }
 
 void InfoWidget::refreshBio() {
+	/** TSupport: Disabling bio option **/
+#if 0
 	TextWithEntities bioText;
 	auto aboutText = self()->about();
 	if (self()->about().isEmpty()) {
@@ -135,6 +147,7 @@ void InfoWidget::refreshBio() {
 			return false;
 		});
 	}
+#endif
 }
 
 void InfoWidget::setLabeledText(

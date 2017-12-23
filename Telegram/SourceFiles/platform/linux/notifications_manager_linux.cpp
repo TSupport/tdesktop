@@ -242,7 +242,7 @@ QString GetServerName() {
 	if (!LibNotifyLoaded()) {
 		return QString();
 	}
-	if (!Libs::notify_is_initted() && !Libs::notify_init("Telegram Desktop")) {
+	if (!Libs::notify_is_initted() && !Libs::notify_init("TSupport Desktop")) {
 		LOG(("LibNotify Error: failed to init!"));
 		return QString();
 	}

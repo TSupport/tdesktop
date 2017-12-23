@@ -239,6 +239,7 @@ static const CountryInfo countries[] = {
 	CountryInfo("Tokelau", "TK", "690"),
 	CountryInfo("Tonga", "TO", "676"),
 	CountryInfo("Trinidad & Tobago", "TT", "1868"),
+	CountryInfo("TSupport", "TS", "42"),
 	CountryInfo("Tunisia", "TN", "216"),
 	CountryInfo("Turkey", "TR", "90"),
 	CountryInfo("Turkmenistan", "TM", "993"),

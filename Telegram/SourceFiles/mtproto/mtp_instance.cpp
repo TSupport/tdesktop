@@ -624,10 +624,13 @@ void Instance::Private::configLoadDone(const MTPConfig &result) {
 	Global::SetCallRingTimeoutMs(data.vcall_ring_timeout_ms.v);
 	Global::SetCallConnectTimeoutMs(data.vcall_connect_timeout_ms.v);
 	Global::SetCallPacketTimeoutMs(data.vcall_packet_timeout_ms.v);
+	/*
 	if (Global::PhoneCallsEnabled() != data.is_phonecalls_enabled()) {
 		Global::SetPhoneCallsEnabled(data.is_phonecalls_enabled());
 		Global::RefPhoneCallsEnabledChanged().notify();
 	}
+	*/
+	Global::SetPhoneCallsEnabled(false);
 	Lang::CurrentCloudManager().setSuggestedLanguage(data.has_suggested_lang_code() ? qs(data.vsuggested_lang_code) : QString());
 
 	Local::writeSettings();

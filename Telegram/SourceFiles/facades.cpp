@@ -596,7 +596,9 @@ struct Data {
 	int32 CallRingTimeoutMs = 90000;
 	int32 CallConnectTimeoutMs = 30000;
 	int32 CallPacketTimeoutMs = 10000;
-	bool PhoneCallsEnabled = true;
+	//bool PhoneCallsEnabled = true;
+	/** For TSupport, phone calls are disabled **/
+	bool PhoneCallsEnabled = false;
 	base::Observable<void> PhoneCallsEnabledChanged;
 
 	HiddenPinnedMessagesMap HiddenPinnedMessages;
