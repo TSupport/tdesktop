@@ -122,6 +122,7 @@ public slots:
 	void saveContextGif();
 	void openContextGif();
 	void copyContextText();
+	void copyContextFooter();
 	void copySelectedText();
 
 	void onMenuDestroy(QObject *obj);
@@ -182,6 +183,7 @@ private:
 		not_null<HistoryItem*> item) const;
 
 	void setToClipboard(const TextWithEntities &forClipboard, QClipboard::Mode mode = QClipboard::Clipboard);
+	void setFooterToClipboard(const TextWithEntities &forClipboard, QClipboard::Mode mode = QClipboard::Clipboard);
 
 	void toggleScrollDateShown();
 	void repaintScrollDateCallback();

@@ -1467,6 +1467,7 @@ void HistoryInner::showContextMenu(QContextMenuEvent *e, bool showFromTouch) {
 				}
 				if (msg && !_contextMenuLink && (!msg->emptyText() || mediaHasTextForCopy)) {
 					_menu->addAction(lang(lng_context_copy_text), this, SLOT(copyContextText()))->setEnabled(true);
+					_menu->addAction(lang(lng_context_copy_footer), this, SLOT(copyContextFooter()))->setEnabled(true);
 				}
 			}
 		}
@@ -1654,6 +1655,21 @@ void HistoryInner::copyContextText() {
 	const auto group = item->getFullGroup();
 	const auto leader = group ? group->leader : item;
 	setToClipboard(leader->selectedText(FullSelection));
+}
+
+void HistoryInner::copyContextFooter() {
+	const auto item = App::contextItem();
+	if (!item || (item->getMedia() && item->getMedia()->type() == MediaTypeSticker)) {
+		return;
+	}
+	const auto group = item->getFullGroup();
+	const auto leader = group ? group->leader : item;
+	setFooterToClipboard(leader->selectedFooter(FullSelection));
+}
+
+void HistoryInner::setFooterToClipboard(const TextWithEntities &forClipboard, QClipboard::Mode mode) {
+	auto data = MimeDataFromTextWithEntities(forClipboard);
+	QApplication::clipboard()->setMimeData(data.release(), mode);
 }
 
 void HistoryInner::setToClipboard(const TextWithEntities &forClipboard, QClipboard::Mode mode) {

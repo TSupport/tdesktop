@@ -212,6 +212,7 @@ public:
 	Storage::SharedMediaTypesMask sharedMediaTypes() const override;
 
 	TextWithEntities selectedText(TextSelection selection) const override;
+	TextWithEntities selectedFooter(TextSelection selection) const override;
 	void setText(const TextWithEntities &textWithEntities) override;
 	TextWithEntities originalText() const override;
 	bool textHasLinks() const override;

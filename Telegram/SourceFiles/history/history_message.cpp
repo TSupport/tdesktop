@@ -24,6 +24,7 @@ Copyright (c) 2014-2017 John Preston, https://desktop.telegram.org
 #include "mainwidget.h"
 #include "mainwindow.h"
 #include "apiwrap.h"
+#include "base/qthelp_regex.h"
 #include "history/history_item_components.h"
 #include "history/history_location_manager.h"
 #include "history/history_service_layout.h"
@@ -1457,6 +1458,24 @@ TextWithEntities HistoryMessage::selectedText(TextSelection selection) const {
 			TextUtilities::Append(wrapped, std::move(result));
 			result = wrapped;
 		}
+	}
+	return result;
+}
+
+TextWithEntities HistoryMessage::selectedFooter(TextSelection selection) const {
+	auto qText = HistoryMessage::selectedText(selection);
+	/**
+	 * TSupport: regex to match footer.
+	 * Example: 
+	 *      #CountryNl |  #other (#deepthought) | #bot | #app16829 (#v0_1) #tq79125365
+	 **/
+	using namespace qthelp;
+	auto matchOptions = RegExOption::CaseInsensitive;
+	auto footerMatch = regex_match(qsl("(#Country.+\\s*\\|\\s*#.+ \\(.+\\)\\s*\\|\\s*#.+\\s*\\|\\s*#.+\\s*\\(.+\\)\\s*#tq\\d+)$"), qText.text, matchOptions);
+	auto result = TextWithEntities();
+	if (footerMatch) {
+		auto matched_footer = footerMatch->capturedRef(1);
+		result.text = matched_footer.toString();
 	}
 	return result;
 }

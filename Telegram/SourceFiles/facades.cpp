@@ -625,10 +625,10 @@ struct Data {
 	QByteArray DownloadPathBookmark;
 	base::Observable<void> DownloadPathChanged;
 
-	bool SoundNotify = true;
-	bool DesktopNotify = true;
+	bool SoundNotify = false;
+	bool DesktopNotify = false;
 	bool RestoreSoundNotifyFromTray = false;
-	bool IncludeMuted = true;
+	bool IncludeMuted = false;
 	DBINotifyView NotifyView = dbinvShowPreview;
 	bool NativeNotifications = false;
 	int NotificationsCount = 3;

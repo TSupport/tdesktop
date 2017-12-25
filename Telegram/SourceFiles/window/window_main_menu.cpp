@@ -155,16 +155,22 @@ void MainMenu::checkSelf() {
 			self,
 			Ui::UserpicButton::Role::Custom,
 			st::mainMenuUserpic);
-		_userpicButton->setClickedCallback(showSelfChat);
+		//_userpicButton->setClickedCallback(showSelfChat);
 		_userpicButton->show();
+		/** TSupport: Disabling Saved Messages button **/
+#if 0
 		_cloudButton.create(this, st::mainMenuCloudButton);
 		_cloudButton->setClickedCallback(showSelfChat);
 		_cloudButton->show();
+#endif
 		update();
 		updateControlsGeometry();
 	} else {
 		_userpicButton.destroy();
+		/** TSupport: Disabling Saved Messages button **/
+#if 0
 		_cloudButton.destroy();
+#endif
 	}
 }
 
@@ -177,9 +183,12 @@ void MainMenu::updateControlsGeometry() {
 	if (_userpicButton) {
 		_userpicButton->moveToLeft(st::mainMenuUserpicLeft, st::mainMenuUserpicTop);
 	}
+	/** TSupport: Disabling Saved Messages button **/
+#if 0
 	if (_cloudButton) {
 		_cloudButton->moveToRight(0, st::mainMenuCoverHeight - _cloudButton->height());
 	}
+#endif
 	_menu->moveToLeft(0, st::mainMenuCoverHeight + st::mainMenuSkip);
 	_telegram->moveToLeft(st::mainMenuFooterLeft, height() - st::mainMenuTelegramBottom - _telegram->height());
 	_version->moveToLeft(st::mainMenuFooterLeft, height() - st::mainMenuVersionBottom - _version->height());
@@ -207,6 +216,8 @@ void MainMenu::paintEvent(QPaintEvent *e) {
 			p.setFont(st::normalFont);
 			p.drawTextLeft(st::mainMenuCoverTextLeft, st::mainMenuCoverStatusTop, width(), _phoneText);
 		}
+		/** TSupport: Disabling Saved Messages button **/
+#if 0
 		if (_cloudButton) {
 			Ui::EmptyUserpic::PaintSavedMessages(
 				p,
@@ -226,6 +237,7 @@ void MainMenu::paintEvent(QPaintEvent *e) {
 			//	st::mainMenuCloudSize);
 			//p.drawEllipse(cloudBg);
 		}
+#endif
 	}
 	auto other = QRect(0, st::mainMenuCoverHeight, width(), height() - st::mainMenuCoverHeight).intersected(clip);
 	if (!other.isEmpty()) {

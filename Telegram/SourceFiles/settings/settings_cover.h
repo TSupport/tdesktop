@@ -85,15 +85,15 @@ private:
 	object_ptr<Profile::CoverDropArea> _dropArea = { nullptr };
 
 	object_ptr<Ui::FlatLabel> _name;
-	object_ptr<Ui::IconButton> _editNameInline;
+	object_ptr<Ui::IconButton> _editNameInline = { nullptr };
 	object_ptr<Ui::LinkButton> _cancelPhotoUpload = { nullptr };
 
 	QPoint _statusPosition;
 	QString _statusText;
 	bool _statusTextIsOnline = false;
 
-	object_ptr<Ui::RoundButton> _setPhoto;
-	object_ptr<Ui::RoundButton> _editName;
+	object_ptr<Ui::RoundButton> _setPhoto = { nullptr };
+	object_ptr<Ui::RoundButton> _editName = { nullptr };
 	bool _editNameVisible = true;
 
 	int _dividerTop = 0;

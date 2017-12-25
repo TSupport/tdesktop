@@ -47,12 +47,15 @@ CoverWidget::CoverWidget(QWidget *parent, UserData *self)
 	this,
 	App::wnd()->controller(),
 	_self,
-	Ui::UserpicButton::Role::OpenPhoto,
+	Ui::UserpicButton::Role::Custom,
 	st::settingsPhoto)
-, _name(this, st::settingsNameLabel)
+, _name(this, st::settingsNameLabel) {
+/** TSupport: Disabling edit profile options **/
+#if 0
 , _editNameInline(this, st::settingsEditButton)
 , _setPhoto(this, langFactory(lng_settings_upload), st::settingsPrimaryButton)
 , _editName(this, langFactory(lng_settings_edit), st::settingsSecondaryButton) {
+#endif
 	if (_self) {
 		_self->updateFull();
 	}
@@ -61,12 +64,15 @@ CoverWidget::CoverWidget(QWidget *parent, UserData *self)
 	_name->setSelectable(true);
 	_name->setContextCopyText(lang(lng_profile_copy_fullname));
 
+/** TSupport: Disabling edit profile options **/
+#if 0
 	_setPhoto->setClickedCallback(App::LambdaDelayed(
 		st::settingsPrimaryButton.ripple.hideDuration,
 		this,
 		[this] { chooseNewPhoto(); }));
 	_editName->addClickHandler([this] { editName(); });
 	_editNameInline->addClickHandler([this] { editName(); });
+#endif
 
 	auto observeEvents = Notify::PeerUpdate::Flag::NameChanged | Notify::PeerUpdate::Flag::PhotoChanged;
 	subscribe(Notify::PeerUpdated(), Notify::PeerUpdatedHandler(observeEvents, [this](const Notify::PeerUpdate &update) {
@@ -84,7 +90,8 @@ CoverWidget::CoverWidget(QWidget *parent, UserData *self)
 		this,
 		&CoverWidget::onPhotoUploadStatusChanged);
 
-	_userpicButton->addClickHandler([this] { showPhoto(); });
+	/** TSupport: Disabling show user picture **/
+	//_userpicButton->addClickHandler([this] { showPhoto(); });
 	validatePhoto();
 
 	refreshNameText();
@@ -157,6 +164,8 @@ int CoverWidget::resizeGetHeight(int newWidth) {
 }
 
 void CoverWidget::refreshButtonsGeometry(int newWidth) {
+	/** TSupport: **/
+	if (_setPhoto == nullptr || _editName == nullptr ) { return; }
 	auto margins = getMargins();
 	auto buttonLeft = margins.left() + _userpicButton->x() + _userpicButton->width() + st::settingsButtonLeft;
 	_setPhoto->moveToLeft(
@@ -179,7 +188,7 @@ void CoverWidget::refreshNameGeometry(int newWidth) {
 	auto nameTop = _userpicButton->y() + st::settingsNameTop;
 	auto nameWidth = newWidth - infoLeft - st::settingsNameLeft;
 	auto editNameInlineVisible = !_editNameVisible;
-	if (editNameInlineVisible) {
+	if (editNameInlineVisible && _editNameInline != nullptr) {
 		nameWidth -= _editNameInline->width();
 	}
 
@@ -189,11 +198,13 @@ void CoverWidget::refreshNameGeometry(int newWidth) {
 		margins.top() + nameTop,
 		newWidth);
 
-	_editNameInline->moveToLeft(
-		margins.left() + nameLeft + _name->widthNoMargins() + st::settingsNameLabel.margin.right(),
-		margins.top() + nameTop - st::settingsNameLabel.margin.top(),
-		newWidth);
-	_editNameInline->setVisible(editNameInlineVisible);
+	if (_editNameInline != nullptr) {
+		_editNameInline->moveToLeft(
+			margins.left() + nameLeft + _name->widthNoMargins() + st::settingsNameLabel.margin.right(),
+			margins.top() + nameTop - st::settingsNameLabel.margin.top(),
+			newWidth);
+		_editNameInline->setVisible(editNameInlineVisible);
+	}
 }
 
 void CoverWidget::paintContents(Painter &p) {

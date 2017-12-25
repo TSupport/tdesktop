@@ -112,7 +112,7 @@ SavedPeersByTime gSavedPeersByTime;
 
 ReportSpamStatuses gReportSpamStatuses;
 
-int32 gAutoDownloadPhoto = 0; // all auto download
-int32 gAutoDownloadAudio = 0;
-int32 gAutoDownloadGif = 0;
-bool gAutoPlayGif = true;
+int32 gAutoDownloadPhoto = dbiadNoPrivate | dbiadNoGroups; // all auto download
+int32 gAutoDownloadAudio = dbiadNoPrivate | dbiadNoGroups;
+int32 gAutoDownloadGif = dbiadNoPrivate | dbiadNoGroups;
+bool gAutoPlayGif = false;

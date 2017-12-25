@@ -366,6 +366,10 @@ public:
 		return { qsl("[-]"), EntitiesInText() };
 	}
 
+	virtual TextWithEntities selectedFooter(TextSelection selection) const {
+		return { qsl("[-]"), EntitiesInText() };
+	}
+
 	virtual QString notificationHeader() const {
 		return QString();
 	}

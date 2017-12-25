@@ -79,12 +79,15 @@ void InfoWidget::refreshMobileNumber() {
 		phoneText,
 		TextWithEntities(),
 		lang(lng_profile_copy_phone));
+	/** TSupport: Disabling option to change number **/
+#if 0
 	if (auto text = _mobileNumber->entity()->textLabel()) {
 		text->setRichText(textcmdLink(1, phoneText.text));
 		text->setLink(1, std::make_shared<LambdaClickHandler>([] {
 			Ui::show(Box<ChangePhoneBox>());
 		}));
 	}
+#endif
 }
 
 void InfoWidget::refreshUsername() {
