@@ -40,6 +40,7 @@ Copyright (c) 2014-2017 John Preston, https://desktop.telegram.org
 #include "styles/style_history.h"
 #include "calls/calls_instance.h"
 #include "ui/empty_userpic.h"
+#include "ui/grouped_layout.h"
 
 namespace {
 
@@ -116,33 +117,6 @@ int32 gifMaxStatusWidth(DocumentData *document) {
 	int32 result = st::normalFont->width(formatDownloadText(document->size, document->size));
 	result = qMax(result, st::normalFont->width(formatGifAndSizeText(document->size)));
 	return result;
-}
-
-QSize CountPixSizeForSize(QSize original, QSize geometry) {
-	const auto width = geometry.width();
-	const auto height = geometry.height();
-	auto tw = original.width();
-	auto th = original.height();
-	if (tw * height > th * width) {
-		if (th > height || tw * height < 2 * th * width) {
-			tw = (height * tw) / th;
-			th = height;
-		} else if (tw < width) {
-			th = (width * th) / tw;
-			tw = width;
-		}
-	} else {
-		if (tw > width || th * width < 2 * tw * height) {
-			th = (width * th) / tw;
-			tw = width;
-		} else if (tw > 0 && th < height) {
-			tw = (height * tw) / th;
-			th = height;
-		}
-	}
-	if (tw < 1) tw = 1;
-	if (th < 1) th = 1;
-	return { tw, th };
 }
 
 } // namespace
@@ -468,7 +442,9 @@ void HistoryPhoto::draw(Painter &p, const QRect &r, TextSelection selection, Tim
 		p.drawPixmap(rthumb.topLeft(), pix);
 	}
 	if (radial || (!loaded && !_data->loading())) {
-		float64 radialOpacity = (radial && loaded && !_data->uploading()) ? _animation->radial.opacity() : 1;
+		const auto radialOpacity = (radial && loaded && !_data->uploading())
+			? _animation->radial.opacity() :
+			1.;
 		QRect inner(rthumb.x() + (rthumb.width() - st::msgFileSize) / 2, rthumb.y() + (rthumb.height() - st::msgFileSize) / 2, st::msgFileSize, st::msgFileSize);
 		p.setPen(Qt::NoPen);
 		if (selected) {
@@ -626,7 +602,10 @@ void HistoryPhoto::drawGrouped(
 		App::complexOverlayRect(p, geometry, roundRadius, corners);
 	}
 
-	if (radial || (!loaded && !_data->loading())) {
+	const auto displayState = radial
+		|| (!loaded && !_data->loading())
+		|| _data->waitingForAlbum();
+	if (displayState) {
 		const auto radialOpacity = (radial && loaded && !_data->uploading())
 			? _animation->radial.opacity()
 			: 1.;
@@ -655,8 +634,10 @@ void HistoryPhoto::drawGrouped(
 		}
 
 		p.setOpacity(radialOpacity);
-		auto icon = ([radial, this, selected]() -> const style::icon*{
-			if (radial || _data->loading()) {
+		auto icon = [&]() -> const style::icon* {
+			if (_data->waitingForAlbum()) {
+				return &(selected ? st::historyFileThumbWaitingSelected : st::historyFileThumbWaiting);
+			} else if (radial || _data->loading()) {
 				auto delayed = _data->full->toDelayedStorageImage();
 				if (!delayed || !delayed->location().isNull()) {
 					return &(selected ? st::historyFileThumbCancelSelected : st::historyFileThumbCancel);
@@ -664,7 +645,7 @@ void HistoryPhoto::drawGrouped(
 				return nullptr;
 			}
 			return &(selected ? st::historyFileThumbDownloadSelected : st::historyFileThumbDownload);
-		})();
+		}();
 		if (icon) {
 			icon->paintInCenter(p, inner);
 		}
@@ -699,6 +680,19 @@ HistoryTextState HistoryPhoto::getStateGrouped(
 		: _savel);
 }
 
+float64 HistoryPhoto::dataProgress() const {
+	return _data->progress();
+}
+
+bool HistoryPhoto::dataFinished() const {
+	return !_data->loading()
+		&& (!_data->uploading() || _data->waitingForAlbum());
+}
+
+bool HistoryPhoto::dataLoaded() const {
+	return _data->loaded();
+}
+
 void HistoryPhoto::validateGroupedCache(
 		const QRect &geometry,
 		RectParts corners,
@@ -726,7 +720,7 @@ void HistoryPhoto::validateGroupedCache(
 
 	const auto originalWidth = convertScale(_data->full->width());
 	const auto originalHeight = convertScale(_data->full->height());
-	const auto pixSize = CountPixSizeForSize(
+	const auto pixSize = Ui::GetImageScaleSizeForGeometry(
 		{ originalWidth, originalHeight },
 		{ width, height });
 	const auto pixWidth = pixSize.width() * cIntRetinaFactor();
@@ -1184,8 +1178,10 @@ void HistoryVideo::drawGrouped(
 	}
 
 	p.setOpacity(radialOpacity);
-	auto icon = ([this, radial, selected, loaded]() -> const style::icon * {
-		if (loaded && !radial) {
+	auto icon = [&]() -> const style::icon * {
+		if (_data->waitingForAlbum()) {
+			return &(selected ? st::historyFileThumbWaitingSelected : st::historyFileThumbWaiting);
+		} else if (loaded && !radial) {
 			return &(selected ? st::historyFileThumbPlaySelected : st::historyFileThumbPlay);
 		} else if (radial || _data->loading()) {
 			if (_parent->id > 0 || _data->uploading()) {
@@ -1194,7 +1190,7 @@ void HistoryVideo::drawGrouped(
 			return nullptr;
 		}
 		return &(selected ? st::historyFileThumbDownloadSelected : st::historyFileThumbDownload);
-	})();
+	}();
 	if (icon) {
 		icon->paintInCenter(p, inner);
 	}
@@ -1225,6 +1221,19 @@ HistoryTextState HistoryVideo::getStateGrouped(
 		: _savel);
 }
 
+float64 HistoryVideo::dataProgress() const {
+	return _data->progress();
+}
+
+bool HistoryVideo::dataFinished() const {
+	return !_data->loading()
+		&& (!_data->uploading() || _data->waitingForAlbum());
+}
+
+bool HistoryVideo::dataLoaded() const {
+	return _data->loaded();
+}
+
 void HistoryVideo::validateGroupedCache(
 		const QRect &geometry,
 		RectParts corners,
@@ -1252,7 +1261,7 @@ void HistoryVideo::validateGroupedCache(
 
 	const auto originalWidth = convertScale(_data->thumb->width());
 	const auto originalHeight = convertScale(_data->thumb->height());
-	const auto pixSize = CountPixSizeForSize(
+	const auto pixSize = Ui::GetImageScaleSizeForGeometry(
 		{ originalWidth, originalHeight },
 		{ width, height });
 	const auto pixWidth = pixSize.width();
@@ -1304,8 +1313,8 @@ void HistoryVideo::updateStatusText() const {
 	int32 statusSize = 0, realDuration = 0;
 	if (_data->status == FileDownloadFailed || _data->status == FileUploadFailed) {
 		statusSize = FileStatusSizeFailed;
-	} else if (_data->status == FileUploading) {
-		statusSize = _data->uploadOffset;
+	} else if (_data->uploading()) {
+		statusSize = _data->uploadingData->offset;
 	} else if (_data->loading()) {
 		statusSize = _data->loadOffset();
 	} else if (_data->loaded()) {
@@ -1398,6 +1407,18 @@ HistoryDocument::HistoryDocument(
 	if (captioned) {
 		Get<HistoryDocumentCaptioned>()->_caption = captioned->_caption;
 	}
+}
+
+float64 HistoryDocument::dataProgress() const {
+	return _data->progress();
+}
+
+bool HistoryDocument::dataFinished() const {
+	return !_data->loading() && !_data->uploading();
+}
+
+bool HistoryDocument::dataLoaded() const {
+	return _data->loaded();
 }
 
 void HistoryDocument::createComponents(bool caption) {
@@ -1599,7 +1620,9 @@ void HistoryDocument::draw(Painter &p, const QRect &r, TextSelection selection, 
 		}
 
 		if (_data->status != FileUploadFailed) {
-			const ClickHandlerPtr &lnk((_data->loading() || _data->status == FileUploading) ? thumbed->_linkcancell : thumbed->_linksavel);
+			const auto &lnk = (_data->loading() || _data->uploading())
+				? thumbed->_linkcancell
+				: thumbed->_linksavel;
 			bool over = ClickHandler::showAsActive(lnk);
 			p.setFont(over ? st::semiboldFont->underline() : st::semiboldFont);
 			p.setPen(outbg ? (selected ? st::msgFileThumbLinkOutFgSelected : st::msgFileThumbLinkOutFg) : (selected ? st::msgFileThumbLinkInFgSelected : st::msgFileThumbLinkInFg));
@@ -1792,7 +1815,9 @@ HistoryTextState HistoryDocument::getState(QPoint point, HistoryStateRequest req
 
 		if (_data->status != FileUploadFailed) {
 			if (rtlrect(nameleft, linktop, thumbed->_linkw, st::semiboldFont->height, _width).contains(point)) {
-				result.link = (_data->loading() || _data->uploading()) ? thumbed->_linkcancell : thumbed->_linksavel;
+				result.link = (_data->loading() || _data->uploading())
+					? thumbed->_linkcancell
+					: thumbed->_linksavel;
 				return result;
 			}
 		}
@@ -1978,8 +2003,8 @@ bool HistoryDocument::updateStatusText() const {
 	int32 statusSize = 0, realDuration = 0;
 	if (_data->status == FileDownloadFailed || _data->status == FileUploadFailed) {
 		statusSize = FileStatusSizeFailed;
-	} else if (_data->status == FileUploading) {
-		statusSize = _data->uploadOffset;
+	} else if (_data->uploading()) {
+		statusSize = _data->uploadingData->offset;
 	} else if (_data->loading()) {
 		statusSize = _data->loadOffset();
 	} else if (_data->loaded()) {
@@ -2795,8 +2820,8 @@ void HistoryGif::updateStatusText() const {
 	int32 statusSize = 0, realDuration = 0;
 	if (_data->status == FileDownloadFailed || _data->status == FileUploadFailed) {
 		statusSize = FileStatusSizeFailed;
-	} else if (_data->status == FileUploading) {
-		statusSize = _data->uploadOffset;
+	} else if (_data->uploading()) {
+		statusSize = _data->uploadingData->offset;
 	} else if (_data->loading()) {
 		statusSize = _data->loadOffset();
 	} else if (_data->loaded()) {
@@ -2950,15 +2975,19 @@ HistoryGif::~HistoryGif() {
 }
 
 float64 HistoryGif::dataProgress() const {
-	return (_data->uploading() || !_parent || _parent->id > 0) ? _data->progress() : 0;
+	return (_data->uploading() || _parent->id > 0)
+		? _data->progress()
+		: 0;
 }
 
 bool HistoryGif::dataFinished() const {
-	return (!_parent || _parent->id > 0) ? (!_data->loading() && !_data->uploading()) : false;
+	return (_parent->id > 0)
+		? (!_data->loading() && !_data->uploading())
+		: false;
 }
 
 bool HistoryGif::dataLoaded() const {
-	return (!_parent || _parent->id > 0) ? _data->loaded() : false;
+	return (_parent->id > 0) ? _data->loaded() : false;
 }
 
 HistorySticker::HistorySticker(

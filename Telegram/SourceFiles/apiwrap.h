@@ -28,13 +28,17 @@ Copyright (c) 2014-2017 John Preston, https://desktop.telegram.org
 #include "base/flat_set.h"
 #include "chat_helpers/stickers.h"
 
+class TaskQueue;
 class AuthSession;
+enum class SparseIdsLoadDirection;
+struct MessageGroupId;
+struct SendingAlbum;
+enum class SendMediaType;
 
 namespace Storage {
 enum class SharedMediaType : char;
+struct PreparedList;
 } // namespace Storage
-
-enum class SparseIdsLoadDirection;
 
 namespace Api {
 
@@ -73,8 +77,14 @@ public:
 	void processFullPeer(UserData *user, const MTPUserFull &result);
 
 	void requestSelfParticipant(ChannelData *channel);
-	void kickParticipant(PeerData *peer, UserData *user, const MTPChannelBannedRights &currentRights);
-	void unblockParticipant(PeerData *peer, UserData *user);
+	void kickParticipant(not_null<ChatData*> chat, not_null<UserData*> user);
+	void kickParticipant(
+		not_null<ChannelData*> channel,
+		not_null<UserData*> user,
+		const MTPChannelBannedRights &currentRights);
+	void unblockParticipant(
+		not_null<ChannelData*> channel,
+		not_null<UserData*> user);
 
 	void requestWebPageDelayed(WebPageData *page);
 	void clearWebPageRequest(WebPageData *page);
@@ -188,6 +198,33 @@ public:
 	void readServerHistoryForce(not_null<History*> history);
 	void readServerHistoryForceNew(not_null<History*> history);
 
+	void sendVoiceMessage(
+		QByteArray result,
+		VoiceWaveform waveform,
+		int duration,
+		const SendOptions &options);
+	void sendFiles(
+		Storage::PreparedList &&list,
+		SendMediaType type,
+		QString caption,
+		std::shared_ptr<SendingAlbum> album,
+		const SendOptions &options);
+	void sendFile(
+		const QByteArray &fileContent,
+		SendMediaType type,
+		const SendOptions &options);
+
+	void sendUploadedPhoto(
+		FullMsgId localId,
+		const MTPInputFile &file,
+		bool silent);
+	void sendUploadedDocument(
+		FullMsgId localId,
+		const MTPInputFile &file,
+		const base::optional<MTPInputFile> &thumb,
+		bool silent);
+	void cancelLocalItem(not_null<HistoryItem*> item);
+
 	~ApiWrap();
 
 private:
@@ -285,6 +322,28 @@ private:
 	void applyAffectedMessages(
 		not_null<PeerData*> peer,
 		const MTPmessages_AffectedMessages &result);
+	void sendMessageFail(const RPCError &error);
+	void uploadAlbumMedia(
+		not_null<HistoryItem*> item,
+		const MessageGroupId &groupId,
+		const MTPInputMedia &media);
+	void sendAlbumWithUploaded(
+		not_null<HistoryItem*> item,
+		const MessageGroupId &groupId,
+		const MTPInputMedia &media);
+	void sendAlbumWithCancelled(
+		not_null<HistoryItem*> item,
+		const MessageGroupId &groupId);
+	void sendAlbumIfReady(not_null<SendingAlbum*> album);
+	void sendMedia(
+		not_null<HistoryItem*> item,
+		const MTPInputMedia &media,
+		bool silent);
+	void sendMediaWithRandomId(
+		not_null<HistoryItem*> item,
+		const MTPInputMedia &media,
+		bool silent,
+		uint64 randomId);
 
 	not_null<AuthSession*> _session;
 	mtpRequestId _changelogSubscription = 0;
@@ -306,9 +365,10 @@ private:
 	mtpRequestId _channelMembersForAddRequestId = 0;
 	base::lambda<void(const MTPchannels_ChannelParticipants&)> _channelMembersForAddCallback;
 
-	typedef QPair<PeerData*, UserData*> KickRequest;
-	typedef QMap<KickRequest, mtpRequestId> KickRequests;
-	KickRequests _kickRequests;
+	using KickRequest = std::pair<
+		not_null<ChannelData*>,
+		not_null<UserData*>>;
+	base::flat_map<KickRequest, mtpRequestId> _kickRequests;
 
 	QMap<ChannelData*, mtpRequestId> _selfParticipantRequests;
 
@@ -377,6 +437,8 @@ private:
 	};
 	base::flat_map<not_null<PeerData*>, ReadRequest> _readRequests;
 	base::flat_map<not_null<PeerData*>, MsgId> _readRequestsPending;
+	std::unique_ptr<TaskQueue> _fileLoader;
+	base::flat_map<uint64, std::shared_ptr<SendingAlbum>> _sendingAlbums;
 
 	base::Observable<PeerData*> _fullPeerUpdated;
 

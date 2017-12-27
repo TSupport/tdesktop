@@ -169,7 +169,7 @@ QPixmap BoxContent::grabInnerCache() {
 	auto isBottomShadowVisible = !_bottomShadow->isHidden();
 	if (isTopShadowVisible) _topShadow->setVisible(false);
 	if (isBottomShadowVisible) _bottomShadow->setVisible(false);
-	auto result = myGrab(this, _scroll->geometry());
+	auto result = Ui::GrabWidget(this, _scroll->geometry());
 	if (isTopShadowVisible) _topShadow->setVisible(true);
 	if (isBottomShadowVisible) _bottomShadow->setVisible(true);
 	return result;
@@ -250,7 +250,6 @@ void AbstractBox::paintEvent(QPaintEvent *e) {
 	auto paintBottomRounded = clip.intersects(QRect(0, height() - st::boxRadius, width(), st::boxRadius));
 	if (paintTopRounded || paintBottomRounded) {
 		auto parts = RectPart::None | 0;
-		parts |= RectPart::None;
 		if (paintTopRounded) parts |= RectPart::FullTop;
 		if (paintBottomRounded) parts |= RectPart::FullBottom;
 		App::roundRect(p, rect(), st::boxBg, BoxCorners, nullptr, parts);

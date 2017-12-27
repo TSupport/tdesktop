@@ -195,8 +195,16 @@ inline bool operator!=(const WebFileImageLocation &a, const WebFileImageLocation
 namespace Images {
 
 QImage prepareBlur(QImage image);
-void prepareRound(QImage &image, ImageRoundRadius radius, RectParts corners = RectPart::AllCorners);
-void prepareRound(QImage &image, QImage *cornerMasks, RectParts corners = RectPart::AllCorners);
+void prepareRound(
+	QImage &image,
+	ImageRoundRadius radius,
+	RectParts corners = RectPart::AllCorners,
+	QRect target = QRect());
+void prepareRound(
+	QImage &image,
+	QImage *cornerMasks,
+	RectParts corners = RectPart::AllCorners,
+	QRect target = QRect());
 void prepareCircle(QImage &image);
 QImage prepareColored(style::color add, QImage image);
 QImage prepareOpaque(QImage image);
@@ -212,6 +220,11 @@ enum class Option {
 	RoundedTopRight       = (1 << 6),
 	RoundedBottomLeft     = (1 << 7),
 	RoundedBottomRight    = (1 << 8),
+	RoundedAll            = (None
+		| RoundedTopLeft
+		| RoundedTopRight
+		| RoundedBottomLeft
+		| RoundedBottomRight),
 	Colored               = (1 << 9),
 	TransparentBackground = (1 << 10),
 };

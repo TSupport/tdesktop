@@ -96,16 +96,16 @@ DialogsInner::DialogsInner(QWidget *parent, not_null<Window::Controller*> contro
 	_cancelSearchFromUser->hide();
 
 	subscribe(Auth().downloaderTaskFinished(), [this] { update(); });
-	Auth().data().itemRemoved()
-		| rpl::start_with_next(
-			[this](auto item) { itemRemoved(item); },
-			lifetime());
-	Auth().data().itemRepaintRequest()
-		| rpl::start_with_next([this](auto item) {
-			if (item->history()->lastMsg == item) {
-				item->history()->updateChatListEntry();
-			}
-		}, lifetime());
+	Auth().data().itemRemoved(
+	) | rpl::start_with_next(
+		[this](auto item) { itemRemoved(item); },
+		lifetime());
+	Auth().data().itemRepaintRequest(
+	) | rpl::start_with_next([this](auto item) {
+		if (item->history()->lastMsg == item) {
+			item->history()->updateChatListEntry();
+		}
+	}, lifetime());
 	subscribe(App::histories().sendActionAnimationUpdated(), [this](const Histories::SendActionAnimationUpdate &update) {
 		auto updateRect = Dialogs::Layout::RowPainter::sendActionAnimationRect(update.width, update.height, getFullWidth(), update.textUpdated);
 		updateDialogRow(update.history->peer, MsgId(0), updateRect, UpdateRowSection::Default | UpdateRowSection::Filtered);
@@ -1797,7 +1797,7 @@ void DialogsInner::searchInPeer(PeerData *peer, UserData *from) {
 		_cancelSearchInPeer->show();
 		if (_searchInPeer->isSelf()) {
 			_searchInSavedText.setText(
-				st::dialogsSearchFromStyle,
+				st::msgNameStyle,
 				lang(lng_saved_messages),
 				_textDlgOptions);
 		}

@@ -93,10 +93,11 @@ SlideWrap<RpWidget> *SlideWrap<RpWidget>::finishAnimating() {
 
 SlideWrap<RpWidget> *SlideWrap<RpWidget>::toggleOn(
 		rpl::producer<bool> &&shown) {
-	std::move(shown)
-		| rpl::start_with_next([this](bool shown) {
-			toggle(shown, anim::type::normal);
-		}, lifetime());
+	std::move(
+		shown
+	) | rpl::start_with_next([this](bool shown) {
+		toggle(shown, anim::type::normal);
+	}, lifetime());
 	finishAnimating();
 	return this;
 }
@@ -119,9 +120,10 @@ void SlideWrap<RpWidget>::animationStep() {
 	}
 	auto shouldBeHidden = !_toggled && !_animation.animating();
 	if (shouldBeHidden != isHidden()) {
+		const auto guard = make_weak(this);
 		setVisible(!shouldBeHidden);
-		if (shouldBeHidden) {
-			myEnsureResized(this);
+		if (shouldBeHidden && guard) {
+			SendPendingMoveResizeEvents(this);
 		}
 	}
 }

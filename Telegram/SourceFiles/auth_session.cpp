@@ -33,6 +33,7 @@ Copyright (c) 2014-2017 John Preston, https://desktop.telegram.org
 #include "calls/calls_instance.h"
 #include "window/section_widget.h"
 #include "chat_helpers/tabbed_selector.h"
+#include "boxes/send_files_box.h"
 
 namespace {
 
@@ -41,7 +42,8 @@ constexpr auto kAutoLockTimeoutLateMs = TimeMs(3000);
 } // namespace
 
 AuthSessionData::Variables::Variables()
-: selectorTab(ChatHelpers::SelectorTab::Emoji)
+: sendFilesWay(SendFilesWay::Album)
+, selectorTab(ChatHelpers::SelectorTab::Emoji)
 , floatPlayerColumn(Window::Column::Second)
 , floatPlayerCorner(RectPart::TopRight) {
 }
@@ -80,6 +82,7 @@ QByteArray AuthSessionData::serialize() const {
 			1000000));
 		stream << qint32(_variables.thirdColumnWidth.current());
 		stream << qint32(_variables.thirdSectionExtendedBy);
+		stream << qint32(_variables.sendFilesWay);
 	}
 	return result;
 }
@@ -104,6 +107,7 @@ void AuthSessionData::constructFromSerialized(const QByteArray &serialized) {
 	float64 dialogsWidthRatio = _variables.dialogsWidthRatio.current();
 	int thirdColumnWidth = _variables.thirdColumnWidth.current();
 	int thirdSectionExtendedBy = _variables.thirdSectionExtendedBy;
+	qint32 sendFilesWay = static_cast<qint32>(_variables.sendFilesWay);
 	stream >> selectorTab;
 	stream >> lastSeenWarningSeen;
 	if (!stream.atEnd()) {
@@ -189,6 +193,12 @@ void AuthSessionData::constructFromSerialized(const QByteArray &serialized) {
 	if (_variables.thirdSectionInfoEnabled) {
 		_variables.tabbedSelectorSectionEnabled = false;
 	}
+	auto uncheckedSendFilesWay = static_cast<SendFilesWay>(sendFilesWay);
+	switch (uncheckedSendFilesWay) {
+	case SendFilesWay::Album:
+	case SendFilesWay::Photos:
+	case SendFilesWay::Files: _variables.sendFilesWay = uncheckedSendFilesWay;
+	}
 }
 
 void AuthSessionData::markItemLayoutChanged(not_null<const HistoryItem*> item) {
@@ -243,13 +253,12 @@ auto AuthSessionData::megagroupParticipantRemoved() const -> rpl::producer<Megag
 
 rpl::producer<not_null<UserData*>> AuthSessionData::megagroupParticipantRemoved(
 		not_null<ChannelData*> channel) const {
-	return megagroupParticipantRemoved()
-		| rpl::filter([channel](auto updateChannel, auto user) {
-			return (updateChannel == channel);
-		})
-		| rpl::map([](auto updateChannel, auto user) {
-			return user;
-		});
+	return megagroupParticipantRemoved(
+	) | rpl::filter([channel](auto updateChannel, auto user) {
+		return (updateChannel == channel);
+	}) | rpl::map([](auto updateChannel, auto user) {
+		return user;
+	});
 }
 
 void AuthSessionData::addNewMegagroupParticipant(
@@ -264,13 +273,12 @@ auto AuthSessionData::megagroupParticipantAdded() const -> rpl::producer<Megagro
 
 rpl::producer<not_null<UserData*>> AuthSessionData::megagroupParticipantAdded(
 		not_null<ChannelData*> channel) const {
-	return megagroupParticipantAdded()
-		| rpl::filter([channel](auto updateChannel, auto user) {
-			return (updateChannel == channel);
-		})
-		| rpl::map([](auto updateChannel, auto user) {
-			return user;
-		});
+	return megagroupParticipantAdded(
+	) | rpl::filter([channel](auto updateChannel, auto user) {
+		return (updateChannel == channel);
+	}) | rpl::map([](auto updateChannel, auto user) {
+		return user;
+	});
 }
 
 void AuthSessionData::setTabbedSelectorSectionEnabled(bool enabled) {

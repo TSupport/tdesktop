@@ -74,10 +74,10 @@ void SuggestPhoto(
 	auto box = Ui::show(
 		Box<PhotoCropBox>(image, peerForCrop),
 		LayerOption::KeepOther);
-	box->ready()
-		| rpl::start_with_next(
-			std::forward<Callback>(callback),
-			box->lifetime());
+	box->ready(
+	) | rpl::start_with_next(
+		std::forward<Callback>(callback),
+		box->lifetime());
 }
 
 template <typename Callback>
@@ -367,7 +367,10 @@ QPixmap SendButton::grabContent() {
 	result.fill(Qt::transparent);
 	{
 		Painter p(&result);
-		p.drawPixmap((kWideScale - 1) / 2 * width(), (kWideScale - 1) / 2 * height(), myGrab(this));
+		p.drawPixmap(
+			(kWideScale - 1) / 2 * width(),
+			(kWideScale - 1) / 2 * height(),
+			GrabWidget(this));
 	}
 	return App::pixmapFromImageInPlace(std::move(result));
 }
@@ -498,18 +501,19 @@ void UserpicButton::openPeerPhoto() {
 void UserpicButton::setupPeerViewers() {
 	Notify::PeerUpdateViewer(
 		_peer,
-		Notify::PeerUpdate::Flag::PhotoChanged)
-		| rpl::start_with_next([this] {
-			processNewPeerPhoto();
-			update();
-		}, lifetime());
-	base::ObservableViewer(Auth().downloaderTaskFinished())
-		| rpl::start_with_next([this] {
-			if (_waiting && _peer->userpicLoaded()) {
-				_waiting = false;
-				startNewPhotoShowing();
-			}
-		}, lifetime());
+		Notify::PeerUpdate::Flag::PhotoChanged
+	) | rpl::start_with_next([this] {
+		processNewPeerPhoto();
+		update();
+	}, lifetime());
+	base::ObservableViewer(
+		Auth().downloaderTaskFinished()
+	) | rpl::start_with_next([this] {
+		if (_waiting && _peer->userpicLoaded()) {
+			_waiting = false;
+			startNewPhotoShowing();
+		}
+	}, lifetime());
 }
 
 void UserpicButton::paintEvent(QPaintEvent *e) {
@@ -714,7 +718,7 @@ void UserpicButton::grabOldUserpic() {
 		countPhotoPosition(),
 		QSize(_st.photoSize, _st.photoSize)
 	);
-	_oldUserpic = myGrab(this, photoRect);
+	_oldUserpic = GrabWidget(this, photoRect);
 }
 
 void UserpicButton::startNewPhotoShowing() {

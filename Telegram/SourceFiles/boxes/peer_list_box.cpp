@@ -54,10 +54,10 @@ void PeerListBox::createMultiSelect() {
 
 	auto entity = object_ptr<Ui::MultiSelect>(this, st::contactsMultiSelect, langFactory(lng_participant_filter));
 	_select.create(this, std::move(entity));
-	_select->heightValue()
-		| rpl::start_with_next(
-			[this] { updateScrollSkips(); },
-			lifetime());
+	_select->heightValue(
+	) | rpl::start_with_next(
+		[this] { updateScrollSkips(); },
+		lifetime());
 	_select->entity()->setSubmittedCallback([this](bool chtrlShiftEnter) { content()->submitted(); });
 	_select->entity()->setQueryChangedCallback([this](const QString &query) { searchQueryChanged(query); });
 	_select->entity()->setItemRemovedCallback([this](uint64 itemId) {
@@ -104,15 +104,15 @@ void PeerListBox::prepare() {
 	setDimensions(st::boxWideWidth, st::boxMaxListHeight);
 	if (_select) {
 		_select->finishAnimating();
-		myEnsureResized(_select);
+		Ui::SendPendingMoveResizeEvents(_select);
 		_scrollBottomFixed = true;
 		onScrollToY(0);
 	}
 
-	content()->scrollToRequests()
-		| rpl::start_with_next([this](Ui::ScrollToRequest request) {
-			onScrollToY(request.ymin, request.ymax);
-		}, lifetime());
+	content()->scrollToRequests(
+	) | rpl::start_with_next([this](Ui::ScrollToRequest request) {
+		onScrollToY(request.ymin, request.ymax);
+	}, lifetime());
 
 	if (_init) {
 		_init(this);

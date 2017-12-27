@@ -327,7 +327,7 @@ void ConvertToSupergroupBox::convertDone(const MTPUpdates &updates) {
 	auto handleChats = [](auto &mtpChats) {
 		for_const (auto &mtpChat, mtpChats.v) {
 			if (mtpChat.type() == mtpc_channel) {
-				auto channel = App::channel(mtpChat.c_channel().vid.v);
+				const auto channel = App::channel(mtpChat.c_channel().vid.v);
 				Ui::showPeerHistory(channel, ShowAtUnreadMsgId);
 				Auth().api().requestParticipantsCountDelayed(channel);
 			}
@@ -565,13 +565,22 @@ void DeleteMessagesBox::deleteAndClear() {
 
 	if (_moderateFrom) {
 		if (_banUser && _banUser->checked()) {
-			Auth().api().kickParticipant(_moderateInChannel, _moderateFrom, MTP_channelBannedRights(MTP_flags(0), MTP_int(0)));
+			Auth().api().kickParticipant(
+				_moderateInChannel,
+				_moderateFrom,
+				MTP_channelBannedRights(MTP_flags(0), MTP_int(0)));
 		}
 		if (_reportSpam->checked()) {
-			MTP::send(MTPchannels_ReportSpam(_moderateInChannel->inputChannel, _moderateFrom->inputUser, MTP_vector<MTPint>(1, MTP_int(_ids[0].msg))));
+			MTP::send(
+				MTPchannels_ReportSpam(
+					_moderateInChannel->inputChannel,
+					_moderateFrom->inputUser,
+					MTP_vector<MTPint>(1, MTP_int(_ids[0].msg))));
 		}
 		if (_deleteAll && _deleteAll->checked()) {
-			App::main()->deleteAllFromUser(_moderateInChannel, _moderateFrom);
+			App::main()->deleteAllFromUser(
+				_moderateInChannel,
+				_moderateFrom);
 		}
 	}
 

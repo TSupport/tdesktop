@@ -576,16 +576,18 @@ void ChatData::setInviteLink(const QString &newInviteLink) {
 ChannelData::ChannelData(const PeerId &id)
 : PeerData(id)
 , inputChannel(MTP_inputChannel(MTP_int(bareId()), MTP_long(0))) {
-	Data::PeerFlagValue(this, MTPDchannel::Flag::f_megagroup)
-		| rpl::start_with_next([this](bool megagroup) {
-			if (megagroup) {
-				if (!mgInfo) {
-					mgInfo = std::make_unique<MegagroupInfo>();
-				}
-			} else if (mgInfo) {
-				mgInfo = nullptr;
+	Data::PeerFlagValue(
+		this,
+		MTPDchannel::Flag::f_megagroup
+	) | rpl::start_with_next([this](bool megagroup) {
+		if (megagroup) {
+			if (!mgInfo) {
+				mgInfo = std::make_unique<MegagroupInfo>();
 			}
-		}, _lifetime);
+		} else if (mgInfo) {
+			mgInfo = nullptr;
+		}
+	}, _lifetime);
 }
 
 void ChannelData::setPhoto(const MTPChatPhoto &photo) {
@@ -792,9 +794,12 @@ void ChannelData::applyEditBanned(not_null<UserData*> user, const MTPChannelBann
 		}
 		Data::ChannelAdminChanges(this).feed(peerToUser(user->id), false);
 	} else {
-		if (isKicked && membersCount() > 1) {
-			setMembersCount(membersCount() - 1);
-			flags |= Notify::PeerUpdate::Flag::MembersChanged;
+		if (isKicked) {
+			if (membersCount() > 1) {
+				setMembersCount(membersCount() - 1);
+				flags |= Notify::PeerUpdate::Flag::MembersChanged;
+			}
+			setKickedCount(kickedCount() + 1);
 		}
 	}
 	Notify::peerUpdatedDelayed(this, flags);

@@ -152,10 +152,12 @@ std::unique_ptr<PeerListState> ChatMembersController::saveState() const {
 	auto result = PeerListController::saveState();
 	auto my = std::make_unique<SavedState>();
 	using Flag = Notify::PeerUpdate::Flag;
-	Notify::PeerUpdateViewer(_chat, Flag::MembersChanged)
-		| rpl::start_with_next([state = result.get()](auto update) {
-			state->controllerState = nullptr;
-		}, my->lifetime);
+	Notify::PeerUpdateViewer(
+		_chat,
+		Flag::MembersChanged
+	) | rpl::start_with_next([state = result.get()](auto update) {
+		state->controllerState = nullptr;
+	}, my->lifetime);
 	result->controllerState = std::move(my);
 	return result;
 }
@@ -307,7 +309,8 @@ void ChatMembersController::removeMember(not_null<UserData*> user) {
 	auto text = lng_profile_sure_kick(lt_user, user->firstName);
 	Ui::show(Box<ConfirmBox>(text, lang(lng_box_remove), [user, chat = _chat] {
 		Ui::hideLayer();
-		if (App::main()) App::main()->kickParticipant(chat, user);
+		Auth().api().kickParticipant(chat, user);
+		Ui::showPeerHistory(chat->id, ShowAtTheEndMsgId);
 	}));
 }
 

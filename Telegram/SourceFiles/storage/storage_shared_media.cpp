@@ -36,14 +36,13 @@ std::map<PeerId, SharedMedia::Lists>::iterator
 		auto &list = result->second[index];
 		auto type = static_cast<SharedMediaType>(index);
 
-		list.sliceUpdated()
-			| rpl::map([=](const SparseIdsSliceUpdate &update) {
-				return SharedMediaSliceUpdate(
-					peer,
-					type,
-					update);
-			})
-			| rpl::start_to_stream(_sliceUpdated, _lifetime);
+		list.sliceUpdated(
+		) | rpl::map([=](const SparseIdsSliceUpdate &update) {
+			return SharedMediaSliceUpdate(
+				peer,
+				type,
+				update);
+		}) | rpl::start_to_stream(_sliceUpdated, _lifetime);
 	}
 	return result;
 }
@@ -86,9 +85,9 @@ void SharedMedia::remove(SharedMediaRemoveOne &&query) {
 			auto type = static_cast<SharedMediaType>(index);
 			if (query.types.test(type)) {
 				peerIt->second[index].removeOne(query.messageId);
-				_oneRemoved.fire(std::move(query));
 			}
 		}
+		_oneRemoved.fire(std::move(query));
 	}
 }
 

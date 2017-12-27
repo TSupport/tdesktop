@@ -20,7 +20,6 @@ Copyright (c) 2014-2017 John Preston, https://desktop.telegram.org
 */
 #pragma once
 
-#include "storage/localimageloader.h"
 #include "core/single_timer.h"
 #include "base/weak_ptr.h"
 #include "ui/rp_widget.h"
@@ -32,6 +31,7 @@ class DialogsWidget;
 class HistoryWidget;
 class HistoryHider;
 class StackItem;
+struct FileLoadResult;
 
 namespace Notify {
 struct PeerUpdate;
@@ -79,13 +79,6 @@ namespace Layout {
 class ItemBase;
 } // namespace Layout
 } // namespace InlineBots
-
-enum class DragState {
-	None = 0x00,
-	Files = 0x01,
-	PhotoFiles = 0x02,
-	Image = 0x03,
-};
 
 class MainWidget : public Ui::RpWidget, public RPCSender, private base::Subscriber {
 	Q_OBJECT
@@ -167,7 +160,7 @@ public:
 	QPixmap grabForShowAnimation(const Window::SectionSlideParams &params);
 	void checkMainSectionToLayer();
 
-	void onSendFileConfirm(const FileLoadResultPtr &file);
+	void onSendFileConfirm(const std::shared_ptr<FileLoadResult> &file);
 	bool onSendSticker(DocumentData *sticker);
 
 	void destroyData();
@@ -209,8 +202,6 @@ public:
 
 	void deletePhotoLayer(PhotoData *photo);
 
-	DragState getDragState(const QMimeData *mime);
-
 	bool leaveChatFailed(PeerData *peer, const RPCError &e);
 	void deleteHistoryAfterLeave(PeerData *peer, const MTPUpdates &updates);
 	void deleteMessages(
@@ -233,9 +224,6 @@ public:
 	bool addParticipantsFail(
 		not_null<ChannelData*> channel,
 		const RPCError &e); // for multi invite in channels
-
-	void kickParticipant(ChatData *chat, UserData *user);
-	bool kickParticipantFail(ChatData *chat, const RPCError &e);
 
 	void checkPeerHistory(PeerData *peer);
 	void checkedHistory(PeerData *peer, const MTPmessages_Messages &result);
