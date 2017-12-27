@@ -1076,6 +1076,9 @@ Copyright (c) 2014-2017 John Preston, https://desktop.telegram.org
 "lng_context_pack_add" = "Add Stickers";
 "lng_context_save_file" = "Save File As...";
 "lng_context_copy_text" = "Copy Text";
+"lng_context_copy_footer" = "Copy Footer";
+"lng_context_open_abusebot" = "Open @AbuseBot";
+"lng_context_open_tq" = "Open #tq{peerid}";
 "lng_context_open_gif" = "Open GIF";
 "lng_context_save_gif" = "Save GIF";
 "lng_context_to_msg" = "Go To Message";

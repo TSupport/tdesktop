@@ -558,7 +558,7 @@ void MultiSelect::Inner::keyPressEvent(QKeyEvent *e) {
 		if (e->key() == Qt::Key_Delete || e->key() == Qt::Key_Backspace) {
 			auto itemId = _items[_active]->id();
 			setActiveItemNext();
-			removeItem(itemId);
+			//removeItem(itemId);
 		} else if (e->key() == Qt::Key_Left) {
 			setActiveItemPrevious();
 		} else if (e->key() == Qt::Key_Right) {

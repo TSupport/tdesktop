@@ -34,6 +34,7 @@ Copyright (c) 2014-2017 John Preston, https://desktop.telegram.org
 #include "chat_helpers/message_field.h"
 #include "chat_helpers/stickers.h"
 #include "history/history_widget.h"
+#include "data/data_drafts.h"
 #include "mainwindow.h"
 #include "mainwidget.h"
 #include "auth_session.h"
@@ -1263,6 +1264,7 @@ void HistoryInner::showContextMenu(QContextMenuEvent *e, bool showFromTouch) {
 	auto isUponSelected = 0;
 	auto hasSelected = 0;;
 	if (!_selected.empty()) {
+		QString x = _selected.cbegin()->first->toHistoryMessage()->originalText().text;
 		isUponSelected = -1;
 		if (_selected.cbegin()->second == FullSelection) {
 			hasSelected = 2;
@@ -1348,11 +1350,14 @@ void HistoryInner::showContextMenu(QContextMenuEvent *e, bool showFromTouch) {
 			if (selectedState.count > 0 && selectedState.canForwardCount == selectedState.count) {
 				_menu->addAction(lang(lng_context_forward_selected), _widget, SLOT(onForwardSelected()));
 			}
+			/** TSupport: Disabling delete message button **/
+#if 0
 			if (selectedState.count > 0 && selectedState.canDeleteCount == selectedState.count) {
 				_menu->addAction(lang(lng_context_delete_selected), base::lambda_guarded(this, [this] {
 					_widget->confirmDeleteSelectedItems();
 				}));
 			}
+#endif
 			_menu->addAction(lang(lng_context_clear_selection), _widget, SLOT(onClearSelected()));
 		} else if (item) {
 			if (isUponSelected != -2) {
@@ -1363,6 +1368,8 @@ void HistoryInner::showContextMenu(QContextMenuEvent *e, bool showFromTouch) {
 						}
 					}))->setEnabled(true);
 				}
+				/** TSupport: Disabling delete message button **/
+#if 0
 				if (item->canDelete()) {
 					_menu->addAction(lang(lng_context_delete_msg), base::lambda_guarded(this, [this] {
 						if (const auto item = App::contextItem()) {
@@ -1370,6 +1377,7 @@ void HistoryInner::showContextMenu(QContextMenuEvent *e, bool showFromTouch) {
 						}
 					}));
 				}
+#endif
 			}
 			if (item && item->id > 0 && !item->serviceMsg()) {
 				_menu->addAction(lang(lng_context_select_msg), base::lambda_guarded(this, [this] {
@@ -1468,6 +1476,20 @@ void HistoryInner::showContextMenu(QContextMenuEvent *e, bool showFromTouch) {
 				if (msg && !_contextMenuLink && (!msg->emptyText() || mediaHasTextForCopy)) {
 					_menu->addAction(lang(lng_context_copy_text), this, SLOT(copyContextText()))->setEnabled(true);
 					_menu->addAction(lang(lng_context_copy_footer), this, SLOT(copyContextFooter()))->setEnabled(true);
+					_menu->addAction(lang(lng_context_open_abusebot), this, SLOT(copyContextTqOpenAbuseBot()))->setEnabled(true);
+					/** TSupport: Add "Open #tq" option for #tq's found in message **/
+					//_menu->addAction(lng_context_open_tq(lt_peerid, peer_id), _widget, SLOT(onUnpinMessage()));
+					QRegularExpression reTq("#tq(\\d+)");
+					QRegularExpressionMatchIterator tqMatches = reTq.globalMatch(msg->originalText().text);
+					while (tqMatches.hasNext()) {
+						QRegularExpressionMatch tqMatch = tqMatches.next();
+						if (tqMatch.hasMatch()) {
+							PeerId id = (PeerId) tqMatch.captured(1).toDouble();
+							if (id) {
+								_menu->addAction(lng_context_open_tq(lt_peerid, tqMatch.captured(1)), [this, id] {openTq(id);});
+							}
+						}
+					}
 				}
 			}
 		}
@@ -1485,11 +1507,14 @@ void HistoryInner::showContextMenu(QContextMenuEvent *e, bool showFromTouch) {
 			if (selectedState.count > 0 && selectedState.count == selectedState.canForwardCount) {
 				_menu->addAction(lang(lng_context_forward_selected), _widget, SLOT(onForwardSelected()));
 			}
+			/** TSupport: Disabling delete message button **/
+#if 0
 			if (selectedState.count > 0 && selectedState.count == selectedState.canDeleteCount) {
 				_menu->addAction(lang(lng_context_delete_selected), base::lambda_guarded(this, [this] {
 					_widget->confirmDeleteSelectedItems();
 				}));
 			}
+#endif
 			_menu->addAction(lang(lng_context_clear_selection), _widget, SLOT(onClearSelected()));
 		} else if (item && ((isUponSelected != -2 && (canForward || canDelete)) || item->id > 0)) {
 			if (isUponSelected != -2) {
@@ -1501,6 +1526,8 @@ void HistoryInner::showContextMenu(QContextMenuEvent *e, bool showFromTouch) {
 					}))->setEnabled(true);
 				}
 
+				/** TSupport: Disabling delete message button **/
+#if 0
 				if (canDelete) {
 					_menu->addAction(lang((msg && msg->uploading()) ? lng_context_cancel_upload : lng_context_delete_msg), base::lambda_guarded(this, [this] {
 						if (const auto item = App::contextItem()) {
@@ -1508,6 +1535,7 @@ void HistoryInner::showContextMenu(QContextMenuEvent *e, bool showFromTouch) {
 						}
 					}));
 				}
+#endif
 			}
 			if (item->id > 0 && !item->serviceMsg()) {
 				_menu->addAction(lang(lng_context_select_msg), base::lambda_guarded(this, [this] {
@@ -1657,6 +1685,23 @@ void HistoryInner::copyContextText() {
 	setToClipboard(leader->selectedText(FullSelection));
 }
 
+void HistoryInner::copyContextTqOpenAbuseBot() {
+	const auto item = App::contextItem();
+	if (!item || (item->getMedia() && item->getMedia()->type() == MediaTypeSticker)) {
+		return;
+	}
+	const auto group = item->getFullGroup();
+	const auto leader = group ? group->leader : item;
+	TextWithTags userTq = {QStringLiteral("#tq%1").arg(this->_peer->id), TextWithTags::Tags()};
+	MessageCursor cursor = {userTq.text.size(), userTq.text.size(), QFIXED_MAX};
+	PeerData *peer = App::peerByName("AbuseBot");
+	auto history = App::history(peer->id);
+	history->setLocalDraft(
+			std::make_unique<Data::Draft>(userTq, 0, cursor, false));
+	history->clearEditDraft();
+	Ui::showPeerHistory(peer, ShowAtUnreadMsgId);
+}
+
 void HistoryInner::copyContextFooter() {
 	const auto item = App::contextItem();
 	if (!item || (item->getMedia() && item->getMedia()->type() == MediaTypeSticker)) {
@@ -1670,12 +1715,31 @@ void HistoryInner::copyContextFooter() {
 void HistoryInner::setFooterToClipboard(const TextWithEntities &forClipboard, QClipboard::Mode mode) {
 	auto data = MimeDataFromTextWithEntities(forClipboard);
 	QApplication::clipboard()->setMimeData(data.release(), mode);
+
 }
 
 void HistoryInner::setToClipboard(const TextWithEntities &forClipboard, QClipboard::Mode mode) {
 	if (auto data = MimeDataFromTextWithEntities(forClipboard)) {
 		QApplication::clipboard()->setMimeData(data.release(), mode);
 	}
+}
+
+void HistoryInner::openTq(const PeerId id) {
+#if 1
+	Ui::showPeerHistory(App::peer(id), ShowAtUnreadMsgId);
+#else
+	const auto item = App::contextItem();
+	if (!item || (item->getMedia() && item->getMedia()->type() == MediaTypeSticker)) {
+		return;
+	}
+	const auto group = item->getFullGroup();
+	const auto leader = group ? group->leader : item;
+	TextWithEntities text = leader->selectedText(FullSelection);
+	QRegExp rx("#tq(\\d+)");
+	if (rx.indexIn(text.text)) {
+		Ui::showPeerHistory(App::peer(rx.cap(1).toDouble()), ShowAtUnreadMsgId);
+	}
+#endif
 }
 
 void HistoryInner::resizeEvent(QResizeEvent *e) {
@@ -1771,11 +1835,14 @@ void HistoryInner::keyPressEvent(QKeyEvent *e) {
 	} else if (e->key() == Qt::Key_E && e->modifiers().testFlag(Qt::ControlModifier)) {
 		setToClipboard(getSelectedText(), QClipboard::FindBuffer);
 #endif // Q_OS_MAC
+	/** TSupport Disable Delete message option. **/
+#if 0
 	} else if (e == QKeySequence::Delete) {
 		auto selectedState = getSelectionState();
 		if (selectedState.count > 0 && selectedState.canDeleteCount == selectedState.count) {
 			_widget->confirmDeleteSelectedItems();
 		}
+#endif
 	} else {
 		e->ignore();
 	}

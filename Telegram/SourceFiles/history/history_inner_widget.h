@@ -123,7 +123,9 @@ public slots:
 	void openContextGif();
 	void copyContextText();
 	void copyContextFooter();
+	void copyContextTqOpenAbuseBot();
 	void copySelectedText();
+	void openTq(const PeerId id);
 
 	void onMenuDestroy(QObject *obj);
 	void onTouchSelect();

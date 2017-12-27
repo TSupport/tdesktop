@@ -66,8 +66,11 @@ HistoryTopBarWidget::HistoryTopBarWidget(
 
 	_forward->setClickedCallback([this] { onForwardSelection(); });
 	_forward->setWidthChangedCallback([this] { updateControlsGeometry(); });
+	/** TSupport: Disabling delete message button **/
+#if 0
 	_delete->setClickedCallback([this] { onDeleteSelection(); });
 	_delete->setWidthChangedCallback([this] { updateControlsGeometry(); });
+#endif
 	_clearSelection->setClickedCallback([this] { onClearSelection(); });
 	_call->setClickedCallback([this] { onCall(); });
 	_search->setClickedCallback([this] { onSearch(); });
@@ -450,7 +453,8 @@ void HistoryTopBarWidget::updateControlsVisibility() {
 		return;
 	}
 	_clearSelection->show();
-	_delete->setVisible(_canDelete);
+	/** TSupport: Disabling delete button for selected messages **/
+	_delete->setVisible(false);
 	_forward->setVisible(_canForward);
 
 	auto backVisible = Adaptive::OneColumn()

@@ -1309,6 +1309,8 @@ void ListWidget::showContextMenu(
 					forwardSelected();
 				}));
 		}
+		/** TSupport: Disabling delete message button **/
+#if 0
 		if (canDeleteAll()) {
 			_contextMenu->addAction(
 				lang(lng_context_delete_selected),
@@ -1316,6 +1318,7 @@ void ListWidget::showContextMenu(
 					deleteSelected();
 				}));
 		}
+#endif
 		_contextMenu->addAction(
 			lang(lng_context_clear_selection),
 			base::lambda_guarded(this, [this] {
@@ -1330,6 +1333,8 @@ void ListWidget::showContextMenu(
 						forwardItem(universalId);
 					}));
 			}
+			/** TSupport: Disabling delete message button **/
+#if 0
 			if (item->canDelete()) {
 				_contextMenu->addAction(
 					lang(lng_context_delete_msg),
@@ -1337,6 +1342,7 @@ void ListWidget::showContextMenu(
 						deleteItem(universalId);
 					}));
 			}
+#endif
 		}
 		_contextMenu->addAction(
 			lang(lng_context_select_msg),

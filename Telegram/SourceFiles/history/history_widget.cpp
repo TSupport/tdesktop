@@ -2773,7 +2773,9 @@ void HistoryWidget::historyDownClicked() {
 	} else if (_replyReturn && _replyReturn->history() == _migrated) {
 		showHistory(_peer->id, -_replyReturn->id);
 	} else if (_peer) {
-		showHistory(_peer->id, ShowAtUnreadMsgId);
+		/** TSupport: On clicking historydown button, go to end of chat **/
+		//showHistory(_peer->id, ShowAtUnreadMsgId);
+		showHistory(_peer->id, EndClientMsgId);
 	}
 }
 
