@@ -1016,6 +1016,8 @@ void HistoryWidget::setReportSpamStatus(DBIPeerReportSpamStatus status) {
 	if (_reportSpamStatus == status) {
 		return;
 	}
+	/** TSupport: Disabling report spam **/
+#if 0
 	_reportSpamStatus = status;
 	if (_reportSpamStatus == dbiprsShowButton || _reportSpamStatus == dbiprsReportSent) {
 		Assert(_peer != nullptr);
@@ -1030,6 +1032,7 @@ void HistoryWidget::setReportSpamStatus(DBIPeerReportSpamStatus status) {
 	} else {
 		_reportSpamPanel.destroy();
 	}
+#endif
 }
 
 void HistoryWidget::updateStickersByEmoji() {
@@ -2176,6 +2179,8 @@ void HistoryWidget::newUnreadMsg(History *history, HistoryItem *item) {
 		if (_scroll->scrollTop() + 1 > _scroll->scrollTopMax()) {
 			destroyUnreadBar();
 		}
+		/** TSupport: If message is received when chat is open, dont mark media as read. **/
+#if 0
 		if (App::wnd()->doWeReadServerHistory()) {
 			if (item->mentionsMe() && item->isMediaUnread()) {
 				App::main()->mediaMarkRead(item);
@@ -2183,6 +2188,7 @@ void HistoryWidget::newUnreadMsg(History *history, HistoryItem *item) {
 			Auth().api().readServerHistoryForce(history);
 			return;
 		}
+#endif
 	}
 	Auth().notifications().schedule(history, item);
 	history->setUnreadCount(history->unreadCount() + 1);

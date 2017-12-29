@@ -182,7 +182,6 @@ void PrivacyWidget::createControls() {
 	style::margins marginSkip(0, 0, 0, st::settingsSkip);
 	style::margins slidedPadding(0, marginSmall.bottom() / 2, 0, marginSmall.bottom() - (marginSmall.bottom() / 2));
 
-	createChildRow(_blockedUsers, marginSmall, lang(lng_settings_blocked_users), SLOT(onBlockedUsers()));
 	/** TSupport: Disabling following setting items
 	 * 		Last seen privacy
 	 * 		Phone calls privacy
@@ -190,8 +189,10 @@ void PrivacyWidget::createControls() {
 	 * 		Enable two-step verification
 	 * 		Show all sessions
 	 * 		Account self-destruct settings
+	 * 		Blocked Users
 	 **/
 #if 0
+	createChildRow(_blockedUsers, marginSmall, lang(lng_settings_blocked_users), SLOT(onBlockedUsers()));
 	createChildRow(_lastSeenPrivacy, marginSmall, lang(lng_settings_last_seen_privacy), SLOT(onLastSeenPrivacy()));
 	createChildRow(_callsPrivacy, marginSmall, lang(lng_settings_calls_privacy), SLOT(onCallsPrivacy()));
 	createChildRow(_groupsInvitePrivacy, marginSmall, lang(lng_settings_groups_invite_privacy), SLOT(onGroupsInvitePrivacy()));

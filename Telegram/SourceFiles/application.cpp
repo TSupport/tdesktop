@@ -460,6 +460,8 @@ void Application::stopUpdate() {
 void Application::startUpdateCheck(bool forceWait) {
 	if (!Sandbox::started()) return;
 
+	/** TSupport: Disabling app update for now. Will uncomment later **/
+#if 0
 	_updateCheckTimer->stop();
 	if (_updateThread || _updateReply || !cAutoUpdate() || cExeName().isEmpty()) return;
 
@@ -500,6 +502,7 @@ void Application::startUpdateCheck(bool forceWait) {
 	} else {
 		_updateCheckTimer->start((updateInSecs + 5) * 1000);
 	}
+#endif
 }
 
 #endif // !TDESKTOP_DISABLE_AUTOUPDATE

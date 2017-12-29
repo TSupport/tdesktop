@@ -220,6 +220,8 @@ void Filler::addSearch() {
 }
 
 void Filler::addBlockUser(not_null<UserData*> user) {
+	/** TSupport: Disabling blocking of user **/
+#if 0
 	auto blockText = [](not_null<UserData*> user) {
 		return lang(user->isBlocked()
 			? (user->botInfo
@@ -259,6 +261,7 @@ void Filler::addBlockUser(not_null<UserData*> user) {
 	if (user->blockStatus() == UserData::BlockStatus::Unknown) {
 		Auth().api().requestFullPeer(user);
 	}
+#endif
 }
 
 void Filler::addUserActions(not_null<UserData*> user) {
@@ -290,15 +293,23 @@ void Filler::addUserActions(not_null<UserData*> user) {
 				[user] { AddBotToGroupBoxController::Start(user); });
 		}
 	}
+	/** TSupport: Disabling
+	 * 		Clear history
+	 * 		Delete conversation
+	 * 		Block user
+	 **/
+#if 0
 	_addAction(
 		lang(lng_profile_delete_conversation),
 		DeleteAndLeaveHandler(user));
 	_addAction(
 		lang(lng_profile_clear_history),
 		ClearHistoryHandler(user));
+	/** TSupport: Disabling blocking of user **/
 	if (!user->isInaccessible() && user != App::self()) {
 		addBlockUser(user);
 	}
+#endif
 }
 
 void Filler::addChatActions(not_null<ChatData*> chat) {
@@ -312,12 +323,18 @@ void Filler::addChatActions(not_null<ChatData*> chat) {
 				[chat] { AddChatMembers(chat); });
 		}
 	}
+	/** TSupport: Disabling
+	 * 		Clear history
+	 * 		Delete conversation
+	 **/
+#if 0
 	_addAction(
 		lang(lng_profile_clear_and_exit),
 		DeleteAndLeaveHandler(_peer));
 	_addAction(
 		lang(lng_profile_clear_history),
 		ClearHistoryHandler(_peer));
+#endif
 }
 
 void Filler::addChannelActions(not_null<ChannelData*> channel) {

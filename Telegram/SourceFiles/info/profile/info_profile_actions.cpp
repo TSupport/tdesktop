@@ -522,6 +522,8 @@ void ActionsFiller::addReportAction() {
 }
 
 void ActionsFiller::addBlockAction(not_null<UserData*> user) {
+	/** TSupport: Disabling blocking of user **/
+#if 0
 	auto text = Notify::PeerUpdateValue(
 		user,
 		Notify::PeerUpdate::Flag::UserIsBlocked
@@ -558,6 +560,7 @@ void ActionsFiller::addBlockAction(not_null<UserData*> user) {
 		std::move(toggleOn),
 		std::move(callback),
 		st::infoBlockButton);
+#endif
 }
 
 void ActionsFiller::addLeaveChannelAction(
@@ -609,6 +612,12 @@ void ActionsFiller::fillUserActions(not_null<UserData*> user) {
 		addEditContactAction(user);
 		addDeleteContactAction(user);
 	}
+	/** TSupport: Disabling
+	 * 		Clear history
+	 * 		Delete conversation
+	 * 		Block user
+	 **/
+#if 0
 	addClearHistoryAction(user);
 	addDeleteConversationAction(user);
 	if (!user->isSelf()) {
@@ -623,6 +632,7 @@ void ActionsFiller::fillUserActions(not_null<UserData*> user) {
 		}
 		addBlockAction(user);
 	}
+#endif
 }
 
 void ActionsFiller::fillChannelActions(
