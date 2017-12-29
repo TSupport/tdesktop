@@ -1471,11 +1471,20 @@ TextWithEntities HistoryMessage::selectedFooter(TextSelection selection) const {
 	 **/
 	using namespace qthelp;
 	auto matchOptions = RegExOption::CaseInsensitive;
-	auto footerMatch = regex_match(qsl("(#Country.+\\s*\\|\\s*#.+ \\(.+\\)\\s*\\|\\s*#.+\\s*\\|\\s*#.+\\s*\\(.+\\)\\s*#tq\\d+)$"), qText.text, matchOptions);
 	auto result = TextWithEntities();
+	auto footerRegex1 = qsl("(?:\\#\\w{7}(?<country>\\w{2})[\\s|\\|]+|\\s)\\#(?<system>\\w+)[\\s|\\|]+\\(\\#(?<systemversion>.+)\\)[\\s|\\|]+\\#(?<device>.+)\\s[\\s|\\|]+\\#(?<app>app\\d+)(?(?<=\\#app6|\\#app1)\\s\\((?<genericdevice>\\w+)\\,\\s\\#(?:V|v)(?<version>(?:\\d(?:[_|\\.]\\d{1,2}){1,2})|\\d)(?:[_|\\.]|0)(?<buildnumber>\\d+)\\)(?(?=\\s\\#)\\s\\#tq(?<telegramid>\\d+))|\\s\\((?<genericdevice1>(?:\\w+|\\w+\\.\\w+|))(?:\\,\\s\\#|\\#)(?:V|v)(?<version1>[\\d|\\w|_|\\.]+)\\)(?(?=\\s\\#)\\s\\#tq(?<telegramid1>\\d+)))");
+	auto footerRegex2 = qsl("(\\#\\w{7}(?<country>\\w{2})[\\s|\\|]+\\#tq(?<telegramid>\\d+)(?<bots>(?:\\n.*|))(?<system>)(?<systemversion>)(?<device>)(?<app>)(?<genericdevice>)(?<version>)(?<buildnumber>))");
+	auto footerMatch = regex_match(footerRegex1, qText.text, matchOptions);
 	if (footerMatch) {
-		auto matched_footer = footerMatch->capturedRef(1);
+		auto matched_footer = footerMatch->capturedRef(0);
 		result.text = matched_footer.toString();
+	}
+	else {
+		footerMatch = regex_match(footerRegex2, qText.text, matchOptions);
+		if (footerMatch) {
+			auto matched_footer = footerMatch->capturedRef(0);
+			result.text = matched_footer.toString();
+		}
 	}
 	return result;
 }
